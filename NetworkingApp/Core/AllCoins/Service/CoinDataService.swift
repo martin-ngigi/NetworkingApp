@@ -22,7 +22,12 @@ class CoinDataService{
                 print("*** Error: Failed to decode coin")
                 return
             }
-            print("---> coins: \(coins)")
+            for coin in coins{
+                print("---> coin name: \(coin.name)")
+            }
+            
+            //print("---> coin list: \(coins)")
+            print("---> coins count: \(coins.count)")
         }.resume()
     }
     func fetchPrice(coin: String, completion: @escaping(Double) -> Void){
