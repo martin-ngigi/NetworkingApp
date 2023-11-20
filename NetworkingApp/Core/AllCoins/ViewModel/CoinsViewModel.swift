@@ -21,9 +21,13 @@ class CoinsViewModel: ObservableObject{
     }
     
     func fetchCoins(){
-        service.fetchCoins { coins in
+        service.fetchCoins { coins, error in
             DispatchQueue.self.main.async {
-                self.coins = coins
+                if let error = error{
+                    self.errorMessage = error.localizedDescription
+                    return
+                }
+                self.coins = coins ?? []
             }
             /**
             for coin in coins {
