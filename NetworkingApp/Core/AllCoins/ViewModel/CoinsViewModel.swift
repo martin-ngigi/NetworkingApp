@@ -21,6 +21,7 @@ class CoinsViewModel: ObservableObject{
     }
     
     func fetchCoins(){
+        /**
         service.fetchCoins { coins, error in
             DispatchQueue.self.main.async {
                 if let error = error{
@@ -29,11 +30,18 @@ class CoinsViewModel: ObservableObject{
                 }
                 self.coins = coins ?? []
             }
-            /**
-            for coin in coins {
-                print("---> VM coin name: \(coin.name)")
+        }
+        **/
+        
+        service.fetchCoinsWithResults { result in
+            DispatchQueue.main.sync {
+                switch result {
+                case .success(let coins):
+                    self.coins = coins
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
             }
-            **/
         }
     }
     
