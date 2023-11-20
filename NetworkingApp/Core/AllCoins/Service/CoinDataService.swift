@@ -10,33 +10,38 @@ import Foundation
 class CoinDataService{
     private let urlString = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=1h&locale=en"
     
-    func fetchCoinsWithResults(completion: @escaping( Result<[Coin], Error>) -> Void){
+    func fetchCoinsWithResults(completion: @escaping( Result<[Coin], CoinApiError>) -> Void){
         guard let url = URL(string: urlString) else { return }
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error{
-                completion(.failure(error))
+                completion(.failure(.unknownError(error: error)))
             }
-            guard let data  = data else { return }
-            /**
-            let dataAsString = String(data: data, encoding: .utf8)
-            print("---> dataAsString: \(dataAsString)")
-             **/
-            
-            guard let coins = try? JSONDecoder().decode([Coin].self, from: data) else {
-                print("*** Error: Failed to decode coin")
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(.requestFailed(description: "Request failed. ")))
+                print("*** Error: Bad Http response")
                 return
             }
             
-            /**
-            for coin in coins{
-                print("---> coin name: \(coin.name)")
+            guard httpResponse.statusCode == 200 else{
+                completion(.failure(.invalidStatusCode(statusCode: httpResponse.statusCode)))
+                print("*** Error: Bad Http response code: \(httpResponse.statusCode)")
+                return
             }
-            **/
             
-            //print("---> coin list: \(coins)")
-            //print("---> coins count: \(coins.count)")
+            guard let data  = data else {
+                completion(.failure(.invalidData))
+                print("*** Error: Invalid data")
+                return
+            }
             
-            completion(.success(coins))
+            do{
+                let coins = try JSONDecoder().decode([Coin].self, from: data)
+                completion(.success(coins))
+            }
+            catch{
+                print("*** Error: Failed to decode coins with error: \(error)")
+                completion(.failure(.jsonParsingFailure))
+            }
         }.resume()
     }
 
