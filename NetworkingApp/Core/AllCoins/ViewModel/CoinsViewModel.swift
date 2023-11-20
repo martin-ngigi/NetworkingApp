@@ -33,13 +33,13 @@ class CoinsViewModel: ObservableObject{
         }
         **/
         
-        service.fetchCoinsWithResults { result in
+        service.fetchCoinsWithResults { [weak self]result in
             DispatchQueue.main.sync {
                 switch result {
                 case .success(let coins):
-                    self.coins = coins
+                    self?.coins = coins
                 case .failure(let error):
-                    self.errorMessage = error.localizedDescription
+                    self?.errorMessage = error.localizedDescription
                 }
             }
         }
