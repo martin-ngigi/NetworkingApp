@@ -11,7 +11,9 @@ class CoinsViewModel: ObservableObject{
     @Published var coin = ""
     @Published var price = ""
     @Published var errorMessage : String?
+    
     private let service = CoinDataService()
+    @Published var coins = [Coin]()
     
     init() {
 //        fetchPrice(coin: "litecoin")
@@ -19,7 +21,16 @@ class CoinsViewModel: ObservableObject{
     }
     
     func fetchCoins(){
-        service.fetchCoins()
+        service.fetchCoins { coins in
+            DispatchQueue.self.main.async {
+                self.coins = coins
+            }
+            /**
+            for coin in coins {
+                print("---> VM coin name: \(coin.name)")
+            }
+            **/
+        }
     }
     
     func fetchPrice(coin: String){
