@@ -8,31 +8,20 @@
 import Foundation
 
 class CoinsViewModel: ObservableObject{
-    @Published var coin = ""
-    @Published var price = ""
     @Published var errorMessage : String?
     
     private let service = CoinDataService()
     @Published var coins = [Coin]()
     
     init() {
-//        fetchPrice(coin: "litecoin")
-        fetchCoins()
+        Task{ try await fetchCoins() }
     }
     
-    func fetchCoins(){
-        /**
-        service.fetchCoins { coins, error in
-            DispatchQueue.self.main.async {
-                if let error = error{
-                    self.errorMessage = error.localizedDescription
-                    return
-                }
-                self.coins = coins ?? []
-            }
-        }
-        **/
-        
+    func fetchCoins() async throws{
+        self.coins = try await service.fectchCoins()
+    }
+    
+    func fetchCoinsWithCompletionHandler(){
         service.fetchCoinsWithResults { [weak self]result in
             DispatchQueue.main.sync {
                 switch result {
@@ -44,15 +33,4 @@ class CoinsViewModel: ObservableObject{
             }
         }
     }
-    
-    func fetchPrice(coin: String){
-        service.fetchPrice(coin: coin) { priceFromService in
-            DispatchQueue.main.sync {
-                print("---> Price from Service: \(priceFromService)")
-                self.price = "\(priceFromService)"
-                self.coin = coin
-            }
-        }
-    }
-    
 }
